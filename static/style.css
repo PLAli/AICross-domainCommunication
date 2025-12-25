@@ -1,0 +1,60 @@
+/* 可选：额外的样式文件 */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        border-radius: 8px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .main-content {
+        padding: 20px;
+        gap: 20px;
+    }
+}
+
+/* 打印样式 */
+@media print {
+    .container {
+        box-shadow: none;
+        border-radius: 0;
+    }
+    
+    .controls, .footer, .direction-selector {
+        display: none;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #f0f0f0;
+    }
+    
+    .container {
+        background: #2d2d2d;
+        color: #f0f0f0;
+    }
+    
+    .input-section, .output-section {
+        background: #3d3d3d;
+    }
+    
+    .input-area, .output-area {
+        background: #2d2d2d;
+        color: #f0f0f0;
+        border-color: #555;
+    }
+    
+    .direction-btn {
+        color: #ccc;
+    }
+    
+    .direction-btn.active {
+        background: #444;
+        color: #fff;
+    }
+}

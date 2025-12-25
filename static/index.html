@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沟通翻译助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-section, .output-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .direction-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #e9ecef;
+            padding: 5px;
+            border-radius: 6px;
+        }
+        
+        .direction-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .direction-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .direction-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-area {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 2;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .output-area {
+            min-height: 300px;
+            padding: 20px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 16px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        
+        .output-placeholder {
+            color: #adb5bd;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .output-streaming {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .examples {
+            margin-top: 20px;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        
+        .examples h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .example-btn {
+            display: inline-block;
+            margin: 5px;
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .example-btn:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 14px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .word-count {
+            font-size: 14px;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤝 沟通翻译助手</h1>
+            <p>消除产品经理和开发工程师之间的理解鸿沟，实现双向精准翻译</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="section-title">
+                    <span>📝 输入内容</span>
+                </div>
+                
+                <div class="direction-selector">
+                    <button class="direction-btn active" data-direction="pm-to-dev">
+                        <span>👨‍💼 → 👨‍💻</span>
+                        产品经理 → 开发工程师
+                    </button>
+                    <button class="direction-btn" data-direction="dev-to-pm">
+                        <span>👨‍💻 → 👨‍💼</span>
+                        开发工程师 → 产品经理
+                    </button>
+                </div>
+                
+                <textarea 
+                    id="inputText" 
+                    class="input-area" 
+                    placeholder="请输入需要翻译的内容...例如：
+产品视角：我们需要一个智能推荐功能，提升用户停留时长
+开发视角：我们优化了数据库查询，QPS提升了30%"
+                ></textarea>
+                
+                <div class="word-count">
+                    字数: <span id="wordCount">0</span>
+                </div>
+                
+                <div class="examples">
+                    <h4>📋 示例输入：</h4>
+                    <button class="example-btn" data-example="pm">产品需求示例</button>
+                    <button class="example-btn" data-example="dev">技术方案示例</button>
+                </div>
+                
+                <div class="controls">
+                    <button id="clearBtn" class="btn btn-secondary">
+                        🗑️ 清空
+                    </button>
+                    <button id="translateBtn" class="btn btn-primary">
+                        🔄 开始翻译
+                    </button>
+                </div>
+                
+                <div id="status" class="status"></div>
+            </div>
+            
+            <div class="output-section">
+                <div class="section-title">
+                    <span>📄 翻译结果</span>
+                </div>
+                
+                <div id="outputArea" class="output-area">
+                    <div class="output-placeholder">
+                        翻译结果将在这里显示...
+                        <br><br>
+                        <small>支持流式输出，实时查看翻译过程</small>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="copyBtn" class="btn btn-secondary">
+                        📋 复制结果
+                    </button>
+                    <button id="stopBtn" class="btn btn-secondary" disabled>
+                        ⏹️ 停止生成
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by DeepSeek AI | 沟通翻译助手 v1.0 | 专为消除技术沟通障碍设计</p>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentDirection = 'pm-to-dev';
+        let isTranslating = false;
+        let abortController = null;
+        
+        // DOM元素
+        const inputText = document.getElementById('inputText');
+        const outputArea = document.getElementById('outputArea');
+        const translateBtn = document.getElementById('translateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDiv = document.getElementById('status');
+        const wordCountSpan = document.getElementById('wordCount');
+        const directionButtons = document.querySelectorAll('.direction-btn');
+        const exampleButtons = document.querySelectorAll('.example-btn');
+        
+        // 示例文本
+        const examples = {
+            pm: "我们需要一个智能推荐功能，根据用户的浏览历史和购买记录，推荐相关商品。目标是提升用户停留时长和购买转化率，预计能提升用户满意度15%。",
+            dev: "我们采用了Redis缓存热点数据，将数据库查询QPS从5000提升到8000，响应时间从200ms降低到50ms。同时优化了SQL查询语句，减少了70%的全表扫描。"
+        };
+        
+        // 初始化
+        function init() {
+            updateWordCount();
+            setupEventListeners();
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 方向选择
+            directionButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    directionButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentDirection = btn.dataset.direction;
+                    showStatus('已切换翻译方向', 'info');
+                });
+            });
+            
+            // 示例按钮
+            exampleButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const exampleType = btn.dataset.example;
+                    inputText.value = examples[exampleType];
+                    updateWordCount();
+                    showStatus(`已加载${exampleType === 'pm' ? '产品需求' : '技术方案'}示例`, 'info');
+                });
+            });
+            
+            // 输入框事件
+            inputText.addEventListener('input', updateWordCount);
+            
+            // 翻译按钮
+            translateBtn.addEventListener('click', startTranslation);
+            
+            // 清空按钮
+            clearBtn.addEventListener('click', () => {
+                inputText.value = '';
+                outputArea.innerHTML = '<div class="output-placeholder">翻译结果将在这里显示...<br><br><small>支持流式输出，实时查看翻译过程</small></div>';
+                updateWordCount();
+                showStatus('已清空输入和输出', 'info');
+            });
+            
+            // 复制按钮
+            copyBtn.addEventListener('click', copyResult);
+            
+            // 停止按钮
+            stopBtn.addEventListener('click', stopTranslation);
+            
+            // 键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + Enter 开始翻译
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    startTranslation();
+                }
+                
+                // Esc 停止翻译
+                if (e.key === 'Escape' && isTranslating) {
+                    stopTranslation();
+                }
+            });
+        }
+        
+        // 更新字数统计
+        function updateWordCount() {
+            const text = inputText.value;
+            const count = text.trim().length;
+            wordCountSpan.textContent = count;
+        }
+        
+        // 显示状态信息
+        function showStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            // 3秒后自动隐藏
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 开始翻译
+        async function startTranslation() {
+            const text = inputText.value.trim();
+            
+            if (!text) {
+                showStatus('请输入需要翻译的内容', 'error');
+                return;
+            }
+            
+            if (isTranslating) {
+                showStatus('正在翻译中，请等待完成', 'info');
+                return;
+            }
+            
+            // 设置状态
+            isTranslating = true;
+            translateBtn.disabled = true;
+            stopBtn.disabled = false;
+            translateBtn.innerHTML = '<div class="loading"></div> 翻译中...';
+            
+            // 创建AbortController用于中止请求
+            abortController = new AbortController();
+            
+            // 准备输出区域
+            outputArea.innerHTML = '';
+            outputArea.classList.add('output-streaming');
+            
+            showStatus('正在翻译，请稍候...', 'info');
+            
+            try {
+                // 确定API端点
+                const endpoint = currentDirection === 'pm-to-dev' 
+                    ? '/translate/pm-to-dev' 
+                    : '/translate/dev-to-pm';
+                
+                // 发送请求
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        stream: true
+                    }),
+                    signal: abortController.signal
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                // 处理流式响应
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        break;
+                    }
+                    
+                    // 解码并显示
+                    const chunk = decoder.decode(value, { stream: true });
+                    outputArea.innerHTML += chunk;
+                    
+                    // 滚动到底部
+                    outputArea.scrollTop = outputArea.scrollHeight;
+                }
+                
+                showStatus('翻译完成', 'success');
+                
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    showStatus('翻译已停止', 'info');
+                } else {
+                    console.error('翻译错误:', error);
+                    showStatus(`翻译失败: ${error.message}`, 'error');
+                }
+            } finally {
+                // 重置状态
+                isTranslating = false;
+                translateBtn.disabled = false;
+                stopBtn.disabled = true;
+                translateBtn.innerHTML = '🔄 开始翻译';
+                outputArea.classList.remove('output-streaming');
+                abortController = null;
+            }
+        }
+        
+        // 停止翻译
+        function stopTranslation() {
+            if (abortController && isTranslating) {
+                abortController.abort();
+            }
+        }
+        
+        // 复制结果
+        async function copyResult() {
+            const text = outputArea.textContent.trim();
+            
+            if (!text) {
+                showStatus('没有可复制的内容', 'error');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                showStatus('已复制到剪贴板', 'success');
+            } catch (error) {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showStatus('已复制到剪贴板', 'success');
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

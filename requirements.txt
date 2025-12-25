@@ -1,0 +1,16 @@
+# 核心依赖
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-dotenv>=1.0.0
+aiohttp>=3.9.0
+
+# Web框架
+pydantic>=2.0.0
+
+# 开发依赖（可选）
+python-multipart>=0.0.6
+
+# 测试依赖（可选）
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+httpx>=0.24.0
